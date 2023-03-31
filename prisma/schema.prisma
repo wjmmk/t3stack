@@ -6,12 +6,50 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model GroceryList {
   id      Int      @id @default(autoincrement())
   title   String
   checked Boolean? @default(false)
+}
+
+model Product {
+  id String @id @default(cuid())
+  name String
+  photo String
+  Inventory Inventory?
+}
+
+model Inventory {
+  id String @id @default(uuid())
+  count Int
+  product Product @relation(fields: [productId], references: [id])
+  productId String @unique
+  movementInvetory MovementInventory[]
+}
+
+enum EnumTypeMovement {
+  INPUT
+  OUTPUT
+}
+
+model MovementInventory {
+  id String @id @default(cuid())
+  inventary Inventory @relation(fields: [inventoryId], references: [id])
+  inventoryId String 
+  count Int
+  typeMovement EnumTypeMovement
+  date DateTime
+  user User? @relation(fields: [userId], references: [id])
+  userId String?
+}
+
+model User {
+  id String @id @default(cuid())
+  name String
+  email String
+  movements MovementInventory[]
 }
